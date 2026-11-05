@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compilar C++",
+            "type": "shell",
+            "command": "mkdir -p \"${workspaceFolder}/build\" && clang++ -std=c++17 -Wall -g \"${file}\" -o \"${workspaceFolder}/build/${fileBasenameNoExtension}\"",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Compilar y correr",
+            "type": "shell",
+            "command": "\"${workspaceFolder}/build/${fileBasenameNoExtension}\"",
+            "dependsOn": "Compilar C++",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "focus": true
+            }
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "files.exclude": {
+        "**/build": true,
+        "**/*.dSYM": true
+    },
+    "code-runner.executorMap": {
+        "cpp": "cd \"$dir\" && clang++ -std=c++17 -Wall \"$fileName\" -o \"$fileNameWithoutExt\" && \"./$fileNameWithoutExt\""
+    },
+    "code-runner.runInTerminal": true
+}
