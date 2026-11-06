@@ -369,3 +369,107 @@ void ABB<T>::rangoRec(Nodo<T> *p, T a, T b, vector<T> &out)
     }
 }
 */
+/*template <class T>
+Nodo<T>* ABB<T>::lowerBoundHelper(Nodo<T>* p, T x){
+    Nodo<T>* best = nullptr;
+
+    while (p != nullptr){
+        if(x < p->dato){
+            best = p;
+            p=p->izq;
+        }else {
+            p = p->der;
+        }
+    }
+    return best;
+
+}*/
+
+/*template <class T>
+int ABB<T>::tamRec(const Nodo<T>* p) const{
+    if (p == nullptr){
+        return 0;
+    }
+
+    if(!tamRec(p->izq)){
+        return 1;
+    }
+    return tamRec(p->der) + tamRec(p->izq) + 1;
+
+}
+
+template <class T>
+int ABB<T>::size() const{
+    return tamRec(raiz);
+}
+*/
+/*template <class T>
+const Nodo<T>* ABB<T>::minNode(const Nodo<T>* p) const{
+    if (p == nullptr){
+         throw std::runtime_error("Arbol vacio");
+        }
+        const Nodo<T>* actual = p;
+        while(actual->izq != nullptr){
+            actual=actual->izq;
+        }
+        return actual;
+
+}
+
+template <class T>
+const Nodo<T>* ABB<T>::maxNode(const Nodo<T>* p) const{
+    if (p == nullptr){
+          throw std::runtime_error("Arbol vacio");
+        }
+       const Nodo<T>* actual = p;
+        while(actual->der != nullptr){
+            actual=actual->der;
+        }
+        return actual;
+
+}
+
+// Wrappers públicos que devuelven referencias a T
+template <class T>
+const T& ABB<T>::min() const{
+    return minNode(raiz)->dato;
+}
+
+template <class T>
+const T& ABB<T>::max() const{
+    return maxNode(raiz)->dato;
+}
+*/
+/*template <class T>
+void ABB<T>::inordenRec(const Nodo<T>* p, std::vector<T>& out) const{
+    if(p != nullptr){
+
+        inordenRec(p->izq, out);
+        out.push_back(p->dato);
+        inordenRec(p->der, out);
+    }
+}
+
+template <class T>
+std::vector<T> ABB<T>::inorden() const{
+    std::vector<T> u;
+    u.reserve(size());
+    inordenRec(raiz, u);
+    return u;
+}
+*/
+/*template <class T>
+int ABB<T>::alturaRec(const Nodo<T>* p) const{
+    if (p == nullptr){
+        return 0;
+    }
+    return 1 + std::max(alturaRec(p->izq), alturaRec(p->der));
+
+
+}
+
+template <class T>
+int ABB<T>::height() const{
+    return alturaRec(raiz);
+}
+*/
