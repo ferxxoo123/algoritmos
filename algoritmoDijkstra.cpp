@@ -68,9 +68,6 @@ void dijkstra(int V, int w[MAX_V][MAX_V], int s, int d[MAX_V], int p[MAX_V])
         }
         cout << "\t" << p[v] << "\n";
     }
-    cout << endl
-         << endl;
-
     // 7. while V - S is not empty
     while (!V_S.empty())
     {
