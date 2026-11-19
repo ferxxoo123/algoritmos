@@ -1116,3 +1116,510 @@ public:
         return -1;
     }
 };*/
+
+/*
+#include <iostream>
+#include <initializer_list>
+using namespace std;
+
+class ListaPaquetes
+{
+private:
+    struct Nodo
+    {
+        int secuencia;
+        Nodo *siguiente;
+
+        explicit Nodo(int numero)
+            : secuencia(numero), siguiente(nullptr)
+        {
+        }
+    };
+
+    Nodo *cabeza;
+    int cantidad;
+
+public:
+    ListaPaquetes()
+        : cabeza(nullptr), cantidad(0)
+    {
+    }
+
+    ~ListaPaquetes()
+    {
+        while (cabeza != nullptr)
+        {
+            Nodo *borrar = cabeza;
+            cabeza = cabeza->siguiente;
+            delete borrar;
+        }
+
+        cantidad = 0;
+    }
+
+    void agregarAlFinal(int secuencia)
+    {
+        Nodo *nuevo = new Nodo(secuencia);
+
+        if (cabeza == nullptr)
+        {
+            cabeza = nuevo;
+        }
+        else
+        {
+            Nodo *actual = cabeza;
+
+            while (actual->siguiente != nullptr)
+            {
+                actual = actual->siguiente;
+            }
+
+            actual->siguiente = nuevo;
+        }
+
+        cantidad++;
+    }
+
+    int size() const
+    {
+        return cantidad;
+    }
+
+    bool estaVacia() const
+    {
+        return cabeza == nullptr;
+    }
+
+    void imprimir() const
+    {
+        if (cabeza == nullptr)
+        {
+            std::cout << "VACIA";
+        }
+        else
+        {
+            Nodo *actual = cabeza;
+
+            while (actual != nullptr)
+            {
+                std::cout << actual->secuencia;
+
+                if (actual->siguiente != nullptr)
+                {
+                    std::cout << " ";
+                }
+
+                actual = actual->siguiente;
+            }
+        }
+
+        std::cout << '\n';
+    }
+
+    int confirmarHasta(int secuencia)
+    {
+
+        Nodo *actual = cabeza;
+        int confirmado = 0;
+
+        while (actual != nullptr && actual->secuencia != secuencia)
+        {
+            actual = actual->siguiente;
+        }
+        if (actual == nullptr)
+        {
+            return 0;
+        }
+        else
+        {
+            Nodo *borrar = cabeza;
+            Nodo *stop = actual->siguiente;
+
+            while (borrar != stop)
+            {
+                Nodo *temp = borrar;
+                borrar = borrar->siguiente;
+                delete temp;
+                confirmado++;
+            }
+            cabeza = stop;
+            cantidad -= confirmado;
+            return confirmado;
+        }
+    }
+};
+
+void probar(const char *nombre, std::initializer_list<int> valores, int buscar)
+{
+    ListaPaquetes l;
+    for (int v : valores)
+        l.agregarAlFinal(v);
+
+    cout << nombre << ": ";
+    int eliminados = l.confirmarHasta(buscar);
+    cout << eliminados << " " << l.size() << " ";
+    l.imprimir();
+}
+
+int main()
+{
+    probar("vacia          ", {}, 10);                         // esperado: 0 0 VACIA
+    probar("no existe      ", {10, 20, 30}, 99);               // esperado: 0 3 10 20 30
+    probar("primer nodo    ", {10, 20, 30}, 10);               // esperado: 1 2 20 30
+    probar("intermedio     ", {101, 102, 103, 104, 105}, 103); // esperado: 3 2 104 105
+    probar("ultimo nodo    ", {10, 20, 30}, 30);               // esperado: 3 0 VACIA
+    probar("un solo nodo   ", {10}, 10);                       // esperado: 1 0 VACIA
+    probar("un nodo, no est", {10}, 5);                        // esperado: 0 1 10
+    probar("enunciado ej. 2", {201, 202, 203}, 999);           // esperado: 0 3 201 202 203
+}
+*/
+/*
+#include <iostream>
+#include <queue>
+#include <stack>
+
+enum TipoEvento
+{
+    PAQUETE,            // contiene el numero de secuencia de un paquete
+    CAIDA_ENLACE,       // indica que la comunicacion con la nave se interrumpio
+    RECUPERACION_ENLACE // indica que la comunicacion vuelve a estar disponible
+};
+
+struct Evento
+{
+    TipoEvento tipo;
+    int secuencia;
+
+    Evento(TipoEvento tipoEvento = PAQUETE, int numero = 0)
+        : tipo(tipoEvento), secuencia(numero) {}
+};
+
+void procesarEventos(std::queue<Evento> &eventos, std::queue<int> &transmitidos)
+{
+
+    bool enlaceActivo = true;
+    std::stack<int> retenidos; // guarda cuando el enlace esta caido pero en orden invertido
+    std::stack<int> temp; // revierte el orden de los paquetes retenidos para enviarlos correctamente a transmitidos
+
+    while (!eventos.empty())
+    {
+        Evento e = eventos.front();
+        eventos.pop();
+
+        if (e.tipo == PAQUETE)
+        {
+            if (!enlaceActivo)
+            {
+                retenidos.push(e.secuencia);
+            }
+            else
+            {
+                transmitidos.push(e.secuencia);
+            }
+        }
+        else if (e.tipo == CAIDA_ENLACE)
+        {
+            enlaceActivo = false;
+        }
+        else if (e.tipo == RECUPERACION_ENLACE)
+        {
+            enlaceActivo = true;
+            while (!retenidos.empty())
+            {
+                temp.push(retenidos.top());
+                retenidos.pop();
+            }
+            while (!temp.empty())
+            {
+                transmitidos.push(temp.top());
+                temp.pop();
+            }
+        }
+    }
+}
+
+#include <initializer_list>
+
+void imprimirCola(std::queue<int> q)
+{ // copia a propósito, para no vaciar la original
+    if (q.empty())
+        std::cout << "(vacia)";
+    while (!q.empty())
+    {
+        std::cout << q.front() << " ";
+        q.pop();
+    }
+    std::cout << '\n';
+}
+
+void probar(const char *nombre, std::initializer_list<Evento> lista)
+{
+    std::queue<Evento> e;
+    for (const Evento &ev : lista)
+        e.push(ev);
+
+    std::queue<int> t;
+    procesarEventos(e, t);
+
+    std::cout << nombre << ": eventos=" << e.size() << " transmitidos=";
+    imprimirCola(t);
+}
+
+int main()
+{
+    Evento P10(PAQUETE, 10), P20(PAQUETE, 20), P30(PAQUETE, 30), P40(PAQUETE, 40);
+    Evento C(CAIDA_ENLACE), R(RECUPERACION_ENLACE);
+
+    probar("vacia           ", {});                                    // esperado: eventos=0 transmitidos=(vacia)
+    probar("todo activo     ", {P10, P20, P30});                       // esperado: 10 20 30
+    probar("caida sin paq.  ", {P10, C, R, P20});                      // esperado: 10 20
+    probar("un paq. en caida", {C, P10, R});                           // esperado: 10
+    probar("ejemplo enunc.  ", {P10, C, P20, P30, R, P40});            // esperado: 10 20 30 40
+    probar("varias caidas   ", {P10, C, P20, R, P30, C, P40, P10, R}); // esperado: 10 20 30 40 10
+    probar("repetidos       ", {C, P10, P10, P20, R});                 // esperado: 10 10 20
+}
+*/
+/*
+#include <iostream>
+
+class ListaPaquetes
+{
+private:
+    struct Nodo
+    {
+        int secuencia;
+        Nodo *siguiente;
+
+        explicit Nodo(int numero)
+            : secuencia(numero), siguiente(nullptr)
+        {
+        }
+    };
+
+    Nodo *cabeza;
+    int cantidad;
+
+public:
+    ListaPaquetes()
+        : cabeza(nullptr), cantidad(0)
+    {
+    }
+
+    ~ListaPaquetes()
+    {
+        while (cabeza != nullptr)
+        {
+            Nodo *borrar = cabeza;
+            cabeza = cabeza->siguiente;
+            delete borrar;
+        }
+
+        cantidad = 0;
+    }
+
+    void agregarAlFinal(int secuencia)
+    {
+        Nodo *nuevo = new Nodo(secuencia);
+
+        if (cabeza == nullptr)
+        {
+            cabeza = nuevo;
+        }
+        else
+        {
+            Nodo *actual = cabeza;
+
+            while (actual->siguiente != nullptr)
+            {
+                actual = actual->siguiente;
+            }
+
+            actual->siguiente = nuevo;
+        }
+
+        cantidad++;
+    }
+
+    int size() const
+    {
+        return cantidad;
+    }
+
+    bool estaVacia() const
+    {
+        return cabeza == nullptr;
+    }
+
+    void imprimir() const
+    {
+        if (cabeza == nullptr)
+        {
+            std::cout << "VACIA";
+        }
+        else
+        {
+            Nodo *actual = cabeza;
+
+            while (actual != nullptr)
+            {
+                std::cout << actual->secuencia;
+
+                if (actual->siguiente != nullptr)
+                {
+                    std::cout << " ";
+                }
+
+                actual = actual->siguiente;
+            }
+        }
+
+        std::cout << '\n';
+    }
+
+    int cancelarDesde(int secuencia)
+    {
+        Nodo *actual = cabeza;
+        Nodo *anterior = nullptr;
+
+        while (actual != nullptr && actual->secuencia != secuencia)
+        {
+            anterior = actual;
+            actual = actual->siguiente;
+        }
+        if (actual == nullptr)
+        {
+            return 0;
+        }
+        if (anterior == nullptr)
+        {
+            cabeza = nullptr;
+        }
+        else
+        {
+            anterior->siguiente = nullptr;
+        }
+        int cancelados = 0;
+        Nodo *borrar = actual;
+
+        while (borrar != nullptr)
+        {
+            Nodo *temp = borrar;
+            borrar = borrar->siguiente;
+            delete temp;
+            cancelados++;
+        }
+        cantidad -= cancelados;
+        return cancelados;
+    }
+};
+#include <initializer_list>
+
+void probar(const char *nombre, std::initializer_list<int> valores, int buscar)
+{
+    ListaPaquetes l;
+    for (int v : valores)
+        l.agregarAlFinal(v);
+
+    std::cout << nombre << ": ";
+    int eliminados = l.cancelarDesde(buscar);
+    std::cout << eliminados << " " << l.size() << " ";
+    l.imprimir();
+
+    l.agregarAlFinal(999); // se tiene que poder seguir agregando
+    std::cout << "   tras agregar 999: " << l.size() << " ";
+    l.imprimir();
+}
+
+int main()
+{
+    probar("vacia          ", {}, 10);                         // esperado: 0 0 VACIA
+    probar("no existe      ", {10, 20, 30}, 99);               // esperado: 0 3 10 20 30
+    probar("primer nodo    ", {10, 20, 30}, 10);               // esperado: 3 0 VACIA
+    probar("intermedio     ", {301, 302, 303, 304, 305}, 303); // esperado: 3 2 301 302
+    probar("ultimo nodo    ", {401, 402, 403}, 403);           // esperado: 1 2 401 402
+    probar("un solo nodo   ", {10}, 10);                       // esperado: 1 0 VACIA
+}
+*/
+
+/*
+#include <iostream>
+#include <queue>
+#include <stack>
+
+struct Paquete
+{
+    int secuencia;
+    bool urgente;
+
+    Paquete(int numero = 0, bool esUrgente = false)
+        : secuencia(numero), urgente(esUrgente) {}
+};
+
+void priorizarTelemetria(std::queue<Paquete> &entrada, std::queue<int> &salida)
+{
+
+    std::stack<int> normal;
+    std::stack<int> temp;
+
+    while (!entrada.empty())
+    {
+        if (entrada.front().urgente == false)
+        {
+            normal.push(entrada.front().secuencia);
+            entrada.pop();
+        }
+        else
+        {
+            salida.push(entrada.front().secuencia);
+            entrada.pop();
+        }
+    }
+    while (!normal.empty())
+    {
+        temp.push(normal.top());
+        normal.pop();
+    }
+    while (!temp.empty())
+    {
+        salida.push(temp.top());
+        temp.pop();
+    }
+}
+#include <initializer_list>
+
+void imprimirCola(std::queue<int> q)
+{ // copia a propósito, para no vaciar la original
+    if (q.empty())
+        std::cout << "(vacia)";
+    while (!q.empty())
+    {
+        std::cout << q.front() << " ";
+        q.pop();
+    }
+    std::cout << '\n';
+}
+
+void probar(const char *nombre, std::initializer_list<Paquete> lista)
+{
+    std::queue<Paquete> e;
+    for (const Paquete &p : lista)
+        e.push(p);
+
+    std::queue<int> s;
+    priorizarTelemetria(e, s);
+
+    std::cout << nombre << ": entrada=" << e.size() << " salida=";
+    imprimirCola(s);
+}
+
+int main()
+{
+    probar("vacia          ", {});                                                              // esperado: entrada=0 salida=(vacia)
+    probar("todos urgentes ", {{10, true}, {20, true}, {30, true}});                            // esperado: 10 20 30
+    probar("todos normales ", {{10, false}, {20, false}, {30, false}});                         // esperado: 10 20 30
+    probar("enunciado      ", {{10, false}, {20, true}, {30, false}, {40, true}, {50, false}}); // esperado: 20 40 10 30 50
+    probar("otro ejemplo   ", {{81, true}, {25, false}, {17, true}, {60, false}});              // esperado: 81 17 25 60
+    probar("un solo paquete", {{7, false}});                                                    // esperado: 7
+    probar("repetidos      ", {{5, false}, {5, true}, {5, false}, {9, true}});                  // esperado: 5 9 5 5
+}
+*/
